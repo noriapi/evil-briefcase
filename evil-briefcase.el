@@ -31,15 +31,19 @@
 (require 'evil-core)
 (require 's)
 
+(defgroup evil-briefcase nil
+  "Switch cases super easily in visual mode"
+  :prefix "evil-briefcase-"
+  :group 'evil)
+
 (evil-define-operator evil-briefcase-camel-upper (beg end type)
   "Convert text to CamelCase with a Capital C"
   (if (eq type 'block)
       (evil-apply-on-block #'s-upper-camel-case beg end nil)
-      (let ((str (s-upper-camel-case (buffer-substring-no-properties beg end)))
-           )
-        (progn
-          (delete-region beg end)
-          (insert str)))))
+    (let ((str (s-upper-camel-case (buffer-substring-no-properties beg end))))
+      (progn
+        (delete-region beg end)
+        (insert str)))))
 
 (evil-define-operator evil-briefcase-camel-lower (beg end type)
   "Convert text to camelCase with a small C"
@@ -102,9 +106,25 @@
     map))
 
 ;;;###autoload
-(define-minor-mode evil-briefcase-mode
+(defun turn-on-evil-briefcase-mode ()
+  "Enable `evil-briefcase-mode' in the current buffer."
+  (unless (minibufferp)
+    (evil-briefcase-local-mode +1)))
+
+;;;###autoload
+(defun turn-off-evil-briefcase-mode ()
+  "Disable `evil-briefcase-mode' in the current buffer."
+  (evil-briefcase-local-mode -1))
+
+;;;###autoload
+(define-minor-mode evil-briefcase-local-mode
+  "evil-briefcase minor mode."
   :lighter " evil-briefcase"
-  )
+  :group 'evil-briefcase)
+
+;;;###autoload
+(define-globalized-minor-mode evil-briefcase-mode
+  evil-briefcase-local-mode turn-on-evil-briefcase-mode)
 
 (provide 'evil-briefcase)
 ;;; evil-briefcase.el ends here
